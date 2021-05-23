@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node ./dist/main.js",
     "build": "webpack --mode production",
     "watch-webpack": "webpack --mode development --watch",
     "watch-node": "nodemon ./dist/main.js",
