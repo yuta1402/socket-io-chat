@@ -34,7 +34,7 @@ const serverConfig = {
 const clientConfig = {
   mode: "development",
   entry: {
-    index: "./src/client/index.ts",
+    index: "./src/client/index.tsx",
   },
   output: {
     path: path.resolve(__dirname, "dist"),
