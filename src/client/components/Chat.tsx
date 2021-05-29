@@ -70,12 +70,7 @@ const Chat = () => {
         </button>
       </div>
       {videoURL && (
-        <iframe
-          width="640"
-          height="360"
-          src={videoURL}
-          allow="accelerometer; autoplay;"
-        />
+        <iframe width="640" height="360" src={videoURL} allow="autoplay;" />
       )}
       <ul>
         {messages.map((m, i) => {
