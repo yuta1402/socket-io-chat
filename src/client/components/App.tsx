@@ -4,6 +4,7 @@ import io, { Socket } from "socket.io-client";
 const App = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [text, setText] = useState<string>("");
+  const [videoURL, setVideoURL] = useState<string>("");
 
   const socketRef = useRef<Socket>();
 
@@ -13,6 +14,11 @@ const App = () => {
     socketRef.current.on("message", (payload) => {
       console.log("Received: " + payload);
       setMessages((prev) => [...prev, payload]);
+    });
+
+    socketRef.current.on("videourl", (payload) => {
+      console.log("Receive: " + payload);
+      setVideoURL(payload);
     });
 
     return () => {
@@ -29,27 +35,41 @@ const App = () => {
   };
 
   const handleButtonClick = () => {
+    const regexp = /^https:\/\/www.youtube.com\//;
+    if (regexp.test(text)) {
+      const url = new URL(text);
+      const params = new URLSearchParams(url.search);
+      const videoID = params.get("v");
+
+      socketRef.current!.emit(
+        "videourl",
+        "https://www.youtube.com/embed/" + videoID
+      );
+    }
+
     socketRef.current!.emit("message", text);
-    // setMessages((prev) => [...prev, text]);
     setText("");
   };
 
   return (
     <div>
-      <input
-        type="text"
-        value={text}
-        onChange={handleInputChange}
-        onKeyPress={(e) => {
-          if (e.key == "Enter") {
-            e.preventDefault();
-            handleButtonClick();
-          }
-        }}
-      />
-      <button disabled={!text} onClick={handleButtonClick}>
-        送信
-      </button>
+      <div>
+        <input
+          type="text"
+          value={text}
+          onChange={handleInputChange}
+          onKeyPress={(e) => {
+            if (e.key == "Enter") {
+              e.preventDefault();
+              handleButtonClick();
+            }
+          }}
+        />
+        <button disabled={!text} onClick={handleButtonClick}>
+          送信
+        </button>
+      </div>
+      {videoURL && <iframe width="640" height="360" src={videoURL} />}
       <ul>
         {messages.map((m, i) => {
           return <li key={i}>{m}</li>;
