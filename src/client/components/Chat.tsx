@@ -43,7 +43,7 @@ const Chat = () => {
 
       socketRef.current!.emit(
         "videourl",
-        "https://www.youtube.com/embed/" + videoID + "?autoplay=1"
+        "https://www.youtube.com/embed/" + videoID + "?autoplay=1&playsinline=1"
       );
     }
 
