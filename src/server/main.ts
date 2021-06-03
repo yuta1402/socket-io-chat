@@ -26,6 +26,11 @@ io.on("connection", (socket) => {
     io.emit("videourl", url);
     console.log("videoURL: " + url);
   });
+
+  socket.on("operation", (ops) => {
+    io.emit("operation", ops);
+    console.log("operation: " + ops);
+  });
 });
 
 server.listen(PORT, () => {

@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
+import YouTube from "react-youtube";
+import { YouTubePlayer } from "youtube-player/dist/types";
 
 const Chat = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [text, setText] = useState<string>("");
   const [videoURL, setVideoURL] = useState<string>("");
+
+  const [player, setPlayer] = useState<YouTubePlayer | null>(null);
 
   const socketRef = useRef<Socket>();
 
@@ -19,6 +23,21 @@ const Chat = () => {
     socketRef.current.on("videourl", (payload) => {
       console.log("Receive: " + payload);
       setVideoURL(payload);
+    });
+
+    socketRef.current.on("operation", (payload) => {
+      console.log("Receive: " + payload);
+      setPlayer((player) => {
+        switch (payload) {
+          case "play":
+            player!.playVideo();
+            break;
+          case "pause":
+            player!.pauseVideo();
+            break;
+        }
+        return player;
+      });
     });
 
     return () => {
@@ -41,14 +60,24 @@ const Chat = () => {
       const params = new URLSearchParams(url.search);
       const videoID = params.get("v");
 
-      socketRef.current!.emit(
-        "videourl",
-        "https://www.youtube.com/embed/" + videoID + "?autoplay=1&playsinline=1"
-      );
+      socketRef.current!.emit("videourl", videoID);
     }
 
     socketRef.current!.emit("message", text);
     setText("");
+  };
+
+  const handlePlayButtonClick = () => {
+    socketRef.current!.emit("operation", "play");
+    console.log(player!.getCurrentTime());
+  };
+
+  const handlePauseButtonClick = () => {
+    socketRef.current!.emit("operation", "pause");
+  };
+
+  const onReady = (e: { target: YouTubePlayer }) => {
+    setPlayer(e.target);
   };
 
   return (
@@ -69,9 +98,13 @@ const Chat = () => {
           送信
         </button>
       </div>
-      {videoURL && (
-        <iframe width="640" height="360" src={videoURL} allow="autoplay;" />
-      )}
+      {videoURL && <YouTube videoId={videoURL} onReady={onReady} />}
+      <button disabled={!player} onClick={handlePlayButtonClick}>
+        Play
+      </button>
+      <button disabled={!player} onClick={handlePauseButtonClick}>
+        Pause
+      </button>
       <ul>
         {messages.map((m, i) => {
           return <li key={i}>{m}</li>;
